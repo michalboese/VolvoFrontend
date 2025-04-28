@@ -1,13 +1,13 @@
 <template>
   <div
-    class="w-full max-w-3xl bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col space-y-8 transition-all duration-500"
+    class="w-full max-w-3xl bg-gray-200 p-8 rounded-2xl shadow-2xl flex flex-col space-y-8 transition-all duration-500"
   >
     <textarea
       ref="textareaRef"
       v-model="text"
       @input="autoResize"
       placeholder="Wklej tekst do streszczenia..."
-      class="w-full p-4 border border-gray-600 rounded-lg min-h-[16rem] resize-none bg-gray-900 text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      class="w-full p-4 border border-gray-300 rounded-lg min-h-[26rem] resize-none bg-white text-gray-900 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
     ></textarea>
 
     <div
@@ -16,7 +16,7 @@
       <input
         type="file"
         @change="handleFileUpload"
-        class="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-gray-700 file:text-white hover:file:bg-gray-600 transition-all"
+        class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-gray-300 file:text-gray-700 hover:file:bg-gray-400 transition-all"
       />
       <button
         @click="sendForSummary"
@@ -82,7 +82,7 @@ async function sendForSummary() {
   loading.value = true;
   emit("onLoading", true);
   try {
-    const response = await fetch("http://your-backend-url/api/summarize", {
+    const response = await fetch("backend end-point", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

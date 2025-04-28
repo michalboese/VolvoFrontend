@@ -1,11 +1,11 @@
 <template>
-  <div class="w-screen min-h-screen flex flex-col bg-gray-900 text-white">
-    <!-- Title at top -->
-    <header class="w-full py-6 text-center bg-gray-800 shadow-md">
-      <h1 class="text-4xl font-bold">📝 System Streszczania Volvo</h1>
+  <div class="w-screen min-h-screen flex flex-col bg-white text-white">
+
+    <header class="w-full py-6 text-center bg-gray-200 shadow-md">
+      <h1 class="text-4xl text-gray-800 font-bold">📝 System Streszczania</h1>
     </header>
 
-    <!-- Content centered below -->
+
     <main class="flex flex-1 flex-col items-center justify-center p-6">
       <TextUploader @summaryGenerated="handleSummary" :onLoading="setLoading" />
       <SummaryDisplay
