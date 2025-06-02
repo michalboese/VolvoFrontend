@@ -74,6 +74,8 @@ const language = ref<string>("pl"); // Default language is Polish
 
 const fileType = ref<string>("pdf"); // Default language is Polish
 
+const fileInput = ref<HTMLInputElement | null>(null);
+
 function autoResize() {
   if (textareaRef.value) {
     textareaRef.value.style.height = "auto";
@@ -103,50 +105,59 @@ async function sendForSummary() {
     let result: Blob | undefined;
 
     // Jeśli użytkownik wprowadził tekst ręcznie
-    if (text.value.trim() && !fileType.value) {
-      result = await summarizeText(text.value, { language: language.value });
+    if (text.value.trim()) {
+      result = await summarizeText(text.value, {
+        language: language.value,
+        saveToPdf: fileType.value === "pdf",
+        saveToTxt: fileType.value === "txt",
+      });
+
       if (result instanceof Blob) {
+        const fileName =
+          fileType.value === "pdf" ? "summary.pdf" : "summary.txt";
         const url = URL.createObjectURL(result);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "summary.pdf";
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
       }
+
+      return;
     }
 
     // Jeśli użytkownik wybrał plik (PDF lub TXT)
     if (fileType.value === "pdf" || fileType.value === "txt") {
       // Pobierz plik z inputa
-      const input = document.querySelector(
-        'input[type="file"]'
-      ) as HTMLInputElement;
-      const file = input?.files?.[0];
+      const file = fileInput.value?.files?.[0];
 
       if (!file) {
         alert("Wybierz plik do streszczenia.");
         return;
       }
 
-      if (fileType.value === "pdf") {
+      if (file.type === "application/pdf") {
         result = await summarizePdf(file, {
           language: language.value,
-          saveToPdf: true,
-          saveToTxt: false,
+          saveToPdf: fileType.value === "pdf",
+          saveToTxt: fileType.value === "txt",
         });
-      } else if (fileType.value === "txt") {
+      } else if (file.type === "text/plain") {
         result = await summarizeTxt(file, {
           language: language.value,
-          saveToPdf: false,
-          saveToTxt: true,
+          saveToPdf: fileType.value === "pdf",
+          saveToTxt: fileType.value === "txt",
         });
       }
 
       if (result instanceof Blob) {
+        // if fileType is pdf, download as pdf, else download as txt
+        const fileName =
+          fileType.value === "pdf" ? "summary.pdf" : "summary.txt";
         const url = URL.createObjectURL(result);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "summary.pdf";
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
       }
