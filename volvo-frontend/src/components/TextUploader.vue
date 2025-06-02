@@ -129,9 +129,17 @@ async function sendForSummary() {
       }
 
       if (fileType.value === "pdf") {
-        result = await summarizePdf(file, { language: language.value });
+        result = await summarizePdf(file, {
+          language: language.value,
+          saveToPdf: true,
+          saveToTxt: false,
+        });
       } else if (fileType.value === "txt") {
-        result = await summarizeTxt(file, { language: language.value });
+        result = await summarizeTxt(file, {
+          language: language.value,
+          saveToPdf: false,
+          saveToTxt: true,
+        });
       }
 
       if (result instanceof Blob) {
@@ -143,8 +151,6 @@ async function sendForSummary() {
         URL.revokeObjectURL(url);
       }
     }
-
-    alert("Wprowadź tekst lub wybierz plik.");
   } catch (error) {
     console.error(error);
     alert("Coś poszło nie tak.");
