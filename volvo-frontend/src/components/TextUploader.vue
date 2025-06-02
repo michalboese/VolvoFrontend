@@ -18,6 +18,18 @@
         @change="handleFileUpload"
         class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-gray-300 file:text-gray-700 hover:file:bg-gray-400 transition-all"
       />
+      <select
+        v-model="language"
+        class="block w-full p-2 md:w-auto text-sm text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      >
+        <option value="pl">Polski</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+        <option value="ru">Русский</option>
+      </select>
       <button
         @click="sendForSummary"
         :disabled="loading"
@@ -49,10 +61,15 @@ const loading = ref<boolean>(false);
 // Refs
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 
+const language = ref<string>("pl"); // Default language is Polish
+
 function autoResize() {
   if (textareaRef.value) {
-    textareaRef.value.style.height = "auto"; // Reset height
-    textareaRef.value.style.height = textareaRef.value.scrollHeight + "px"; // Set to scroll height
+    textareaRef.value.style.height = "auto";
+    // Maksymalna wysokość to wysokość okna przeglądarki minus margines (np. 40px)
+    const maxHeight = window.innerHeight - 320;
+    const scrollHeight = textareaRef.value.scrollHeight;
+    textareaRef.value.style.height = Math.min(scrollHeight, maxHeight) + "px";
   }
 }
 
