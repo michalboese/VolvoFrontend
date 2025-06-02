@@ -15,20 +15,28 @@
     >
       <input
         type="file"
-        @change="handleFileUpload"
+        accept=".pdf,.txt"
+        ref="fileInput"
         class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-gray-300 file:text-gray-700 hover:file:bg-gray-400 transition-all"
       />
       <select
         v-model="language"
         class="block w-full p-2 md:w-auto text-sm text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
       >
-        <option value="pl">Polski</option>
-        <option value="en">English</option>
-        <option value="de">Deutsch</option>
-        <option value="fr">Français</option>
-        <option value="es">Español</option>
-        <option value="it">Italiano</option>
-        <option value="ru">Русский</option>
+        <option value="polski">Polski</option>
+        <option value="english">English</option>
+        <option value="deutch">Deutsch</option>
+        <option value="français">Français</option>
+        <option value="español">Español</option>
+        <option value="italiano">Italiano</option>
+        <option value="pусский">Русский</option>
+      </select>
+      <select
+        v-model="fileType"
+        class="block w-full p-2 md:w-auto text-sm text-gray-600 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      >
+        <option value="pdf">PDF</option>
+        <option value="txt">TXT</option>
       </select>
       <button
         @click="sendForSummary"
@@ -49,6 +57,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { summarizeText, summarizePdf, summarizeTxt } from "../api";
 
 const emit = defineEmits<{
   (e: "summaryGenerated", summary: string): void;
@@ -62,6 +71,8 @@ const loading = ref<boolean>(false);
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 
 const language = ref<string>("pl"); // Default language is Polish
+
+const fileType = ref<string>("pdf"); // Default language is Polish
 
 function autoResize() {
   if (textareaRef.value) {
@@ -77,38 +88,63 @@ onMounted(() => {
   autoResize(); // Make sure it resizes when component mounts
 });
 
-function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      text.value = e.target?.result as string;
-      autoResize(); // Resize after file loaded
-    };
-    reader.readAsText(file);
-  }
-}
-
 async function sendForSummary() {
-  if (!text.value.trim()) {
-    alert("Wyślij plik lub wprowadź tekst.");
-    return;
-  }
-
   loading.value = true;
   emit("onLoading", true);
-  try {
-    const response = await fetch("backend end-point", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text: text.value }),
-    });
 
-    const data = (await response.json()) as { summary: string };
-    emit("summaryGenerated", data.summary);
+  console.log("Sending for summary...");
+  console.log("Text:", text.value);
+  console.log("Language:", language.value);
+  console.log("File Type:", fileType.value);
+  console.log("Loading:", loading.value);
+  console.log("File Input:", document.querySelector('input[type="file"]'));
+
+  try {
+    let result: Blob | undefined;
+
+    // Jeśli użytkownik wprowadził tekst ręcznie
+    if (text.value.trim() && !fileType.value) {
+      result = await summarizeText(text.value, { language: language.value });
+      if (result instanceof Blob) {
+        const url = URL.createObjectURL(result);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "summary.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    // Jeśli użytkownik wybrał plik (PDF lub TXT)
+    if (fileType.value === "pdf" || fileType.value === "txt") {
+      // Pobierz plik z inputa
+      const input = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
+      const file = input?.files?.[0];
+
+      if (!file) {
+        alert("Wybierz plik do streszczenia.");
+        return;
+      }
+
+      if (fileType.value === "pdf") {
+        result = await summarizePdf(file, { language: language.value });
+      } else if (fileType.value === "txt") {
+        result = await summarizeTxt(file, { language: language.value });
+      }
+
+      if (result instanceof Blob) {
+        const url = URL.createObjectURL(result);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "summary.pdf";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    alert("Wprowadź tekst lub wybierz plik.");
   } catch (error) {
     console.error(error);
     alert("Coś poszło nie tak.");
