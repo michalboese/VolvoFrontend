@@ -41,7 +41,8 @@
       <button
         @click="sendForSummary"
         :disabled="loading"
-        class="w-full md:w-auto bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+        style="background-color: #1a1a1a"
+        class="w-full md:w-auto text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
       >
         <span
           v-if="loading"
@@ -70,7 +71,7 @@ const loading = ref<boolean>(false);
 // Refs
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 
-const language = ref<string>("pl"); // Default language is Polish
+const language = ref<string>("polski"); // Default language is Polish
 
 const fileType = ref<string>("pdf"); // Default language is Polish
 
